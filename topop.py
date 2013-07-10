@@ -11,32 +11,33 @@ precs = {
     '^': 70
 }
 
+def done(stack, last):
+    temp = last
+    for (op, l) in stack[::-1]: # iterate through stack in reverse
+        temp = node(op, l, temp)
+        print 'stack frame: ', op, l
+    return temp
+
+def unwind(stack, op2, arg2):
+    scratch = arg2
+    # pop any stack levels with a higher prec than the current operator
+    while len(stack) > 0:
+        op1, arg1 = stack[-1]
+        if precs[op2] > precs[op1]:
+            break
+        stack.pop()
+        scratch = node(op1, arg1, scratch)
+    # now we perform the push
+    return stack + [(op2, scratch)]
 
 def expr(stack, xs):
     print 'calling expr: ', stack, xs
     if len(xs) == 0:
-        raise ValueError('oops, empty input')
+        raise ValueError('oops, bad input')
     elif len(xs) == 1:
-        temp = xs[0]
-        for (op, l) in stack[::-1]: # iterate through stack frames in reverse order
-            temp = node(op, l, temp)
-            print 'dumping stack ...' , op, l
-        return temp
+        return done(stack, xs[0])
     fst, op, ys = xs[0], xs[1], xs[2:]
-# what if stack is empty?
-    scratch = fst
-    while True:
-        if len(stack) == 0:
-            break # wow, this is ghetto.  the length check only should be performed once!
-        old_op, old_arg = stack[-1]
-        if precs[op] > precs[old_op]:
-            break
-        stack.pop()
-        scratch = node(old_op, old_arg, scratch)
-        print 'scratch: ', scratch
-    # now we perform the push
-    new_stack = stack + [(op, scratch)]
-    print 'new stack:', new_stack
+    new_stack = unwind(stack, op, fst)
     return expr(new_stack, ys)
 
 
