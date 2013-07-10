@@ -8,26 +8,39 @@ precs = {
 }
 
 
+count = 0
+def result(op, l, r):
+    global count
+    val = {'op': op, 
+           'left': l, 
+           'count': count,
+           'right': r}
+    count += 1
+    return val
+
+
 def expr(f, ts1, power):
     if len(ts1) == 0:
         raise ValueError('bad input! empty')
     elif len(ts1) == 1:
         return (f(ts1[0]), [])
     fst, op, ts2 = ts1[0], ts1[1], ts1[2:]
-    # keep parsing this expression until the precedence < power
     print 'powers: ', precs[op], power
-    if precs[op] > power: # hmm, pretending like there's no ties
+    # keep parsing this expression until the precedence < power
+    if precs[op] > power:                       # ignore ties
         print ' first branch'
-        # return expr(lambda x: {'op': op, 'left': f(fst), 'right': x}, ts2, precs[op])
-        return expr(lambda x: f({'op': op, 'left': fst, 'right': x}), ts2, precs[op])
-    else: # now have to find right side arg of op
+        return expr(lambda x: f(result(op, fst, x)), ts2, precs[op])
+    else: # find right arg
         print '  second branch'
-        left = f(fst)
-        right, ts3 = expr(lambda x: x, ts2, precs[op])
-        return ({'op': op, 'left': left, 'right': right}, ts3)
+        return expr(lambda x: result(op, f(fst), x), ts2, precs[op])
+
+
+def start(xs):
+    fst, op, ys = xs[0], xs[1], xs[2:]
+    return expr(lambda x: result(op, fst, x), ys, precs[op])
 
 
 def run(xs):
-    tree, rest = expr(lambda x: x, xs, 8000)
+    tree, rest = start(xs)
     print json.dumps(tree, indent=4)
     print "rest: ", rest
