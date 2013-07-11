@@ -15,7 +15,7 @@ def done(stack, last):
     temp = last
     for (op, l) in stack[::-1]: # iterate through stack in reverse
         temp = node(op, l, temp)
-        print 'stack frame: ', op, l
+ #       print 'stack frame: ', op, l
     return temp
 
 def unwind(stack, op2, arg2):
@@ -31,7 +31,7 @@ def unwind(stack, op2, arg2):
     return stack + [(op2, scratch)]
 
 def expr(stack, xs):
-    print 'calling expr: ', stack, xs
+#    print 'calling expr: ', stack, xs
     if len(xs) == 0:
         raise ValueError('oops, bad input')
     elif len(xs) == 1:
@@ -40,8 +40,16 @@ def expr(stack, xs):
     new_stack = unwind(stack, op, fst)
     return expr(new_stack, ys)
 
+def pp(node):
+    if isinstance(node, dict):
+        return ''.join(['(',
+                        pp(node['left']), ' ',
+                        node['op'],       ' ', 
+                        pp(node['right']),
+                        ')'])
+    return node
 
 def run(ys):
-    v = json.dumps(expr([], list(ys)), indent=4)
+    v = pp(expr([], list(ys)))
     print v
 #    return v
