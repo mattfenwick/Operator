@@ -3,7 +3,7 @@ def node(op, l, r):
     return {'op': op, 'left': l, 'right': r}
 
 
-precs = {
+python_precs = {
     'or':  -30,
     'and': -20,
     'in': 0, 'is': 0, '<': 0, '<=': 0, '>': 0, '>=': 0, 
@@ -16,7 +16,31 @@ precs = {
     '*': 60, '/': 60, '%': 60, '//': 60,
     '**': 70
 }
-rights = set(['**']) 
+python_rights = set(['**']) 
+
+# now for java
+precs = {
+    # 120: postfix ++ and --
+    # 110: prefix unary ++ -- + - !
+    '*': 100, '/': 100, '%': 100,
+    '+': 90, '-': 90,
+    '<<': 80, '>>': 80, '>>>': 80,
+    '<': 70, '>': 70, '<=': 70, '>=': 70, 'instanceof': 70,
+    '==': 60, '!=': 60,
+    '&': 50,
+    '^': 40,
+    '|': 30,
+    '&&': 20,
+    '||': 10,
+    # normally would be ...?...:... operator here
+    '=':  -10, '+=':  -10, '-=':  -10, '*=':   -10,
+    '/=': -10, '%=':  -10, '&=':  -10, '^=':   -10,
+    '|=': -10, '<<=': -10, '>>=': -10, '>>>=': -10
+}
+
+rights = set(['=',  '+=',  '-=',  '*=', 
+              '/=', '%=',  '&=',  '^=',
+              '|=', '<<=', '>>=', '>>>='])
 
 def done(stack, last):
     temp = last
@@ -36,8 +60,13 @@ def unwind(stack, op2, arg2):
         op1, arg1 = stack[-1]
         if precs[op2] > precs[op1]:
             break
-        if precs[op2] == precs[op1] and op1 in rights:
-            break
+        # also needs to break if right associative
+        if precs[op2] == precs[op1]:
+            # disallow mixed associativity if same precedence
+            if (op1 in rights) != (op2 in rights):
+                raise ValueError('operator associativity error -- cannot mix operators of equal precedence but different associativity')
+            if op1 in rights:
+                break
         stack.pop()
         scratch = node(op1, arg1, scratch)
     # now we perform the push
