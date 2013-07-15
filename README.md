@@ -9,6 +9,13 @@
   parsed as `1 + (2 * 3)` or `(1 + 2) * 3`?
   If precedences are different, associativity does not come into play.
  
+ - prefix vs. infix -- assuming `=` is right-associative, and `!` is as well, since
+   prefix operators seem to have to associate to the right, consider:
+ 
+        ! x = 3
+        
+   Is that `!(x = 3)` or `(!x) = 3`?
+ 
 ### Associativity ###
 
 Only matters when precedences are equal.
@@ -69,3 +76,30 @@ Only matters when precedences are equal.
 
  - unsolved: how to parse the ternary ` ? : ` operator
  
+
+### Error conditions ###
+
+ - mixed associativity, same precedence
+ 
+        infixr  @@ 5
+        infixl  $$ 5
+        prefix  ! 5
+        postfix # 5
+        
+        x @@ y $$ z  -- error
+        x $$ y @@ z  -- error
+        ! x @@ y     -- error
+        x $$ y #     -- error
+        
+ - postfix operator in non-postfix context
+ 
+        ++
+        
+ - non-postfix operator in postfix context
+ 
+ - non-prefix operator in prefix context (can this be reliably recognized?)
+ 
+ - missing operand
+ 
+        x + 
+        a * b ^
