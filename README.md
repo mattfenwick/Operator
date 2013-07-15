@@ -20,6 +20,12 @@ Only matters when precedences are equal.
  - mixed associativity, same precedence:  `x = 3 + 1` or `2 + 3 = x`, assuming that `+` and `=`
    have the same precedence but opposite associativities.  **Probably should result in parse
    error.**
+ 
+ - prefix vs. postfix
+  
+        ! x ++
+        
+   Is it `(!x) ++` or `!(x++)`?  (Probably the latter -- but I guess it should be resolved by precedences)
 
 
 ### Prefix and Postfix ###
