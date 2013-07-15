@@ -7,19 +7,23 @@ def node(op, l, r):
     return {'op': op, 'left': l, 'right': r}
 
 
-prefix = { # always right-associative by default, right?
+prefix = { # always right-associative -- so put them all in the 'rights' set
     '++': 110, '--': 110, '-': 110, '+': 110, '!': 110, '~': 110,
 }
 
 # always left-associative by default?
 #  and they'll all have the same precedence -- higher than any other operator
 #   and there's only one allowed -- i.e. can't do `x ++ ++`
-postfix = set(['++', '--'])
+postfix = {
+    '++': 120, '--': 120
+}
 
 
 precs = {
     # 120: postfix ++ and --
     # 110: prefix unary ++ -- + - ! ~
+    'Z': 120, 'Y': 120,# matches postfix precedence
+    'X': 110, 'W': 110,# matches prefix precedence
     '*': 100, '/': 100, '%': 100,
     '+': 90, '-': 90,
     '<<': 80, '>>': 80, '>>>': 80,
@@ -36,7 +40,7 @@ precs = {
     '|=': -10, '<<=': -10, '>>=': -10, '>>>=': -10
 }
 
-rights = set(['=',  '+=',  '-=',  '*=', 
+rights = set(['=',  '+=',  '-=',  '*=', 'Z', 'X' # check pre/post-fix associativity problem reporting 
               '/=', '%=',  '&=',  '^=',
               '|=', '<<=', '>>=', '>>>='])
 
@@ -59,7 +63,7 @@ def unwind(stack, op2, arg2, p2):
             break
         # also needs to break if right associative
         if p2 == p1:
-            # disallow mixed associativity if same precedence
+            # disallow mixed associativity if same precedence -- but I think this is WRONG for prefix operators
             if (op1 in rights) != (op2 in rights):
                 raise ValueError('error -- equal precedence but different associativity')
             if op1 in rights:
@@ -93,13 +97,31 @@ def expr(stack, xs):
         return done(stack, xs[0])
     
     # step 3
-    snd = xs[1]
-    if snd in postfix:
-        arg = node(snd, fst, None)
-        rest = xs[2:]
-    else:
-        arg = fst
-        rest = xs[1:]
+    # new stuff starts here
+    # example:  `3 + 4 * 5 ?` (where `?` has a low, postfix precedence) becomes `(3 + (4 * 5))?`
+    # `3 + 4 * 5 ??` (where `??` is between `+` and `*`) becomes `3 + ((4 * 5)?)`
+    # `3 + 4 * 5 ???` (where `???` is the highest) becomes `3 + (4 * (5?))`
+    # `3 + 4 * 5 ????` would be an error if `*` were right-associative
+    arg, rest = fst, xs
+    while True:
+        rest = rest[1:]
+        if len(rest) == 0:
+            break
+        post = rest[0]
+        if not post in postfix:
+            break
+        # pop any stack levels with a higher prec than the current operator
+        while len(stack) > 0:
+            op1, arg1, p1 = stack[-1]
+            if postfix[post] > p1:
+                break
+            # disallow mixed associativity if same precedence
+            if postfix[post] == p1 and op1 in rights: # postfix operators are always left-associative
+                raise ValueError('error -- equal precedence but different associativity')
+            stack.pop() # uh-oh, value mutation!
+            arg = node(op1, arg1, arg)
+        arg = node(post, arg, None)
+    # new stuff done here
     
     # step 4 (again)
     if len(rest) == 0:
@@ -130,3 +152,26 @@ def run(ys):
     print json.dumps(v, indent=4)
     print pp(v)
 #    return v
+
+
+def problems():
+    run('! 3 X 1')
+    print 'should have been:  (? ! (3 X 1))'
+    print '-' * 80
+    
+    try:
+        run('! 3 W 1')
+    except Exception as e:
+        print 'good: ', e
+    print 'should have been an error since `!` and `W` have different associativities'
+    print '-' * 80
+
+    try:
+        run('1 Z 2 ++')
+    except Exception as e:
+        print 'good: ', e
+    print 'should have been an error'
+    print '-' * 80
+    
+    run('1 Y 2 ++')
+    print 'should have been: ((1 Y 2) ++ ?)'
