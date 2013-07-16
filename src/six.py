@@ -162,8 +162,12 @@ def pp(node, indent):
         print 'whoops: ', node
         raise
 
+
+def parse(ys):
+    return expr([], ys.split())
+
 def run(ys):
-    v = expr([], ys.split())
+    v = parse(ys)
 #    print json.dumps(v, indent=4)
     print pp(v, 0)
 #    return v
