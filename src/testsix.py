@@ -39,11 +39,12 @@ class TextSix(unittest.TestCase):
         self.assertEqual(n('? [prefix]', [n('*', ['x', '3'])]), p('? x * 3'))
     
     def testInfixPostfixPrecedence(self):
-        self.assertEqual(n('*', ['3', n('++ [postfix]', ['x'])]), p('3 * x ++'))
+        self.assertEqual(n('*', ['8', n('++ [postfix]', ['y'])]), p('8 * y ++'))
         self.assertEqual(n('? [postfix]', [n('*', ['3', 'x'])]), p('3 * x ?'))
+#        self.assertEqual( # a postfix precedence *between* two infix precedences
         
     def testPrefixPostfixPrecedence(self):
-        self.assertEqual(n('? [postfix]', [n('++ [prefix]', ['x'])]), p('++ x ?'))
+        self.assertEqual(n('? [postfix]', [n('++ [prefix]', ['q'])]), p('++ q ?'))
         self.assertEqual(n('? [prefix]', [n('-- [postfix]', ['x'])]), p('? x --'))
     
     def testMixedAssociativity(self):
