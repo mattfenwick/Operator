@@ -67,6 +67,16 @@ def done(stack, last):
         temp = node(op, args + [temp])
     return temp
 
+def parsePrefixes(stack, xs):
+    new_stack, rest = stack, xs
+    while True:
+        fst = rest[0]
+        if fst not in prefix:
+            break
+        new_stack = new_stack + [(fst + ' [prefix]', 'right', prefix[fst], [])]
+        rest = rest[1:]
+    return (new_stack, rest)
+
 def unwind(stack, op2, assoc2, prec2, args2):
     """
     Only handles ties where the operators have identical associativity.
@@ -89,35 +99,8 @@ def unwind(stack, op2, assoc2, prec2, args2):
     # now we perform the push
     return stack + [(op2, assoc2, prec2, scratch)]
 
-
-def expr(stack, xs):
-    """
-    step 1: prefix op (recur if one is found, pushing a stack level)
-    step 2: find the arg
-    step 3: postfix op if one is found
-    step 4: if input is empty, call `done` to pop all pending stack levels
-    step 5: input not empty, thus next token is the binary op
-    step 6: pop stack as far as necessary, based on comparing precedences
-            of pending operators to current op
-    step 7: push new stack level for op
-    """
-    # step 1
-    fst = xs[0]
-    if fst in prefix: # decide infix/prefix or '+'/'-': by what context they're called in
-        new_stack = stack + [(fst + ' [prefix]', 'right', prefix[fst], [])]
-        return expr(new_stack, xs[1:])
-    
-    # so `fst` is our arg -- now let's see if it has a postfix operator
-    # step 2 and step 4 (sort of)
-    if len(xs) == 1:
-        return done(stack, xs[0])
-    
-    # step 3
-    # example:  `3 + 4 * 5 ?` (where `?` has a low, postfix precedence) becomes `(3 + (4 * 5))?`
-    # `3 + 4 * 5 ??` (where `??` is between `+` and `*`) becomes `3 + ((4 * 5)?)`
-    # `3 + 4 * 5 ???` (where `???` is the highest) becomes `3 + (4 * (5?))`
-    # `3 + 4 * 5 ????` would be an error if `*` were right-associative and `????` had the same precedence as `*`
-    arg2, rest = fst, xs
+def parsePostfixes(stack, xs):
+    new_stack, arg2, rest = stack, xs[0], xs
     while True:
         rest = rest[1:]
         if len(rest) == 0:
@@ -125,28 +108,49 @@ def expr(stack, xs):
         post = rest[0]
         if not post in postfix:
             break
-        # pop any stack levels with a higher prec than the current operator
-        while len(stack) > 0:
+        # pop any stack levels with a higher precedence than the current operator
+        while len(new_stack) > 0:
             op1, assoc1, prec1, args1 = stack[-1]
             if postfix[post] > prec1:
                 break
             # disallow mixed associativity if same precedence
             if postfix[post] == prec1 and assoc1 == 'right': # postfix operators are always left-associative
                 raise ValueError('error -- equal precedence but different associativity')
-            stack.pop() # uh-oh, value mutation!
+            new_stack = new_stack[:-1]
             arg2 = node(op1, args1 + [arg2])
         arg2 = node(post + ' [postfix]', [arg2])
+    return new_stack, rest, arg2
+
+def expr(stack1, xs):
+    """
+    step 1: prefixes
+    step 2: find operand
+    step 3: postfixes
+    step 4: if input is empty, call `done` to pop all pending stack levels
+    step 5: input not empty, thus next token is the binary op
+    step 6: pop stack as far as necessary, based on comparing precedences
+            of pending operators to current op
+    step 7: push new stack level for op
+    """
+    stack2, ys = parsePrefixes(stack1, xs)
+    
+    # step 2 and step 4 (sort of)
+    if len(ys) == 1: # len == 0 case handled by parsePrefixes
+        return done(stack2, ys[0])
+    
+    # step 3
+    stack3, zs, arg = parsePostfixes(stack2, ys)
     
     # step 4 (again)
-    if len(rest) == 0:
-        return done(stack, arg2)
+    if len(zs) == 0:
+        return done(stack3, arg)
     
     # step 5
-    op = rest[0]
+    op = zs[0]
     assoc = 'right' if op in rights else 'left'
     # steps 6 and 7
-    popped_stack = unwind(stack, op, assoc, infix[op], [arg2])
-    return expr(popped_stack, rest[1:])
+    stack4 = unwind(stack3, op, assoc, infix[op], [arg])
+    return expr(stack4, zs[1:])
 
 
 def pp(node, indent):
@@ -170,27 +174,3 @@ def run(ys):
     v = parse(ys)
 #    print json.dumps(v, indent=4)
     print pp(v, 0)
-#    return v
-
-
-def problems():
-    run('! 3 X 1')
-    print 'should have been:  (? ! (3 X 1))'
-    print '-' * 80
-    
-    try:
-        run('! 3 W 1')
-    except Exception as e:
-        print 'good: ', e
-    print 'should have been an error since `!` and `W` have different associativities'
-    print '-' * 80
-
-    try:
-        run('1 Z 2 ++')
-    except Exception as e:
-        print 'good: ', e
-    print 'should have been an error'
-    print '-' * 80
-    
-    run('1 Y 2 ++')
-    print 'should have been: ((1 Y 2) ++ ?)'
