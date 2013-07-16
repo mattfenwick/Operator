@@ -20,6 +20,8 @@ import json
 # (operator name, associativity, precedence, list of args)
 
 def node(op, args):
+    if not isinstance(args, list):
+        raise TypeError('expected list, got %s' % str(type(args)))
     return {'op': op, 'args': args}
 
 
@@ -52,15 +54,13 @@ infix = {
     '|=': -10, '<<=': -10, '>>=': -10, '>>>=': -10
 }
 
-rights = set(['=',  '+=',  '-=',  '*=', 'Z', 'X' # check pre/post-fix associativity problem reporting 
+rights = set(['=',  '+=',  '-=',  '*=', 'Z', 'X', # check pre/post-fix associativity problem reporting 
               '/=', '%=',  '&=',  '^=',
               '|=', '<<=', '>>=', '>>>='])
 
 def done(stack, last):
     temp = last
-    print 'done: ', stack, last
     for (op, a, _p, args) in stack[::-1]: # iterate through stack in reverse, ignore precedence and associativity
-        print 'op, args, temp: ', op, args, temp
         temp = node(op, args + [temp])
     return temp
 
@@ -101,7 +101,7 @@ def expr(stack, xs):
     # step 1
     fst = xs[0]
     if fst in prefix: # decide infix/prefix or '+'/'-': by what context they're called in
-        new_stack = stack + [(fst, 'right', prefix[fst], [])]
+        new_stack = stack + [(fst + ' [prefix]', 'right', prefix[fst], [])]
         return expr(new_stack, xs[1:])
     
     # so `fst` is our arg -- now let's see if it has a postfix operator
@@ -110,12 +110,11 @@ def expr(stack, xs):
         return done(stack, xs[0])
     
     # step 3
-    # new stuff starts here
     # example:  `3 + 4 * 5 ?` (where `?` has a low, postfix precedence) becomes `(3 + (4 * 5))?`
     # `3 + 4 * 5 ??` (where `??` is between `+` and `*`) becomes `3 + ((4 * 5)?)`
     # `3 + 4 * 5 ???` (where `???` is the highest) becomes `3 + (4 * (5?))`
-    # `3 + 4 * 5 ????` would be an error if `*` were right-associative
-    arg, rest = fst, xs
+    # `3 + 4 * 5 ????` would be an error if `*` were right-associative and `????` had the same precedence as `*`
+    arg2, rest = fst, xs
     while True:
         rest = rest[1:]
         if len(rest) == 0:
@@ -132,22 +131,20 @@ def expr(stack, xs):
             if postfix[post] == prec1 and op1 in rights: # postfix operators are always left-associative
                 raise ValueError('error -- equal precedence but different associativity')
             stack.pop() # uh-oh, value mutation!
-            arg = node(op1, arg1, arg) # WRONG
-        arg = node(post, arg, None) # WRONG 
-    # new stuff done here
+            arg2 = node(op1, args1 + [arg2])
+        arg2 = node(post + ' [postfix]', [arg2])
     
     # step 4 (again)
     if len(rest) == 0:
-        return done(stack, arg)
+        return done(stack, arg2)
     
     # step 5
     op = rest[0]
     assoc = 'right' if op in rights else 'left'
     # steps 6 and 7
-    print 'hum: ', stack
-    popped_stack = unwind(stack, op, assoc, infix[op], [arg])
-    print 'oh: ', popped_stack
+    popped_stack = unwind(stack, op, assoc, infix[op], [arg2])
     return expr(popped_stack, rest[1:])
+
 
 def pp(node, indent):
     newIndent = indent + 2
@@ -164,7 +161,7 @@ def pp(node, indent):
 
 def run(ys):
     v = expr([], ys.split())
-    print json.dumps(v, indent=4)
+#    print json.dumps(v, indent=4)
     print pp(v, 0)
 #    return v
 
