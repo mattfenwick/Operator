@@ -21,6 +21,12 @@ class TextSix(unittest.TestCase):
     def testLeftAssociativity(self):
         self.assertEqual(n('+', [n('+', ['2', '3']), '4']), p('2 + 3 + 4'))
     
+    def testPrefixAssociativity(self):
+        self.assertEqual(n('! [prefix]', [n('X', ['3', '1'])]), p('! 3 X 1'))
+    
+    def testPostfixAssociativity(self):
+        self.assertEqual(n('++ [postfix]', [n('Y', ['1', '2'])]), p('1 Y 2 ++'))
+    
     def testRightAssociativity(self):
         self.assertEqual(n('=', ['x', n('=', ['y', 'z'])]), p('x = y = z'))
     
