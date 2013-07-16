@@ -20,12 +20,6 @@ import json
 # stack
 # (operator name, associativity, precedence, list of args)
 
-def node(op, args):
-    if not isinstance(args, list):
-        raise TypeError('expected list, got %s' % str(type(args)))
-    return {'op': op, 'args': args}
-
-
 prefix = {
     '++': 110, '--': 110, '-': 110, '+': 110, '!': 110, '~': 110,
     '?': 50
@@ -61,6 +55,12 @@ rights = set(['=',  '+=',  '-=',  '*=', 'Z', 'X', # check pre/post-fix associati
               '/=', '%=',  '&=',  '^=',
               '|=', '<<=', '>>=', '>>>='])
 
+
+def node(op, args):
+    if not isinstance(args, list):
+        raise TypeError('expected list, got %s' % str(type(args)))
+    return {'op': op, 'args': args}
+
 def done(stack, last):
     temp = last
     for (op, a, _p, args) in stack[::-1]: # iterate through stack in reverse, ignore precedence and associativity
@@ -77,11 +77,6 @@ def parsePrefixes(stack, xs):
     return (stack, xs)
 
 def unwind(stack, assoc2, prec2, arg2):
-    """
-    Only handles ties where the operators have identical associativity.
-    Blows up if ties between different associativities.
-    """
-    scratch = arg2
     # pop any stack levels with a higher prec than the current operator
     while len(stack) > 0:
         op1, assoc1, prec1, args1 = stack[-1]
@@ -94,8 +89,8 @@ def unwind(stack, assoc2, prec2, arg2):
             if assoc1 == 'right': # what about if it's non-associative?
                 break
         stack = stack[:-1]
-        scratch = node(op1, args1 + [scratch])
-    return stack, scratch
+        arg2 = node(op1, args1 + [arg2])
+    return stack, arg2
 
 def parsePostfixes(stack, arg2, xs):
     while True:
@@ -114,31 +109,25 @@ def expr(stack, xs):
     step 1: prefixes
     step 2: operand
     step 3: postfixes
-    step 4: if input is empty, call `done` to pop all pending stack levels
-    step 5: input not empty, thus next token is the binary op
-    step 6: pop stack as far as necessary, based on comparing precedences
-            of pending operators to current op
-    step 7: push new stack level for op
+    step 4: binary op
+    step 5: pop stack (if necessary)
+    step 6: push new stack frame
     """
     stack, xs = parsePrefixes(stack, xs)
     
-    # step 2 and step 4 (sort of)
     if len(xs) == 1: # len == 0 case handled by parsePrefixes
         return done(stack, xs[0])
     
-    # step 3
     stack, xs, arg = parsePostfixes(stack, xs[0], xs[1:])
     
-    # step 4 (again)
     if len(xs) == 0:
         return done(stack, arg)
     
-    # step 5
     op = xs[0]
     assoc = 'right' if op in rights else 'left'
-    # step 6
+    # step 5
     stack, arg2 = unwind(stack, assoc, infix[op], arg)
-    # step 7
+    # step 6
     stack = stack + [(op, assoc, infix[op], [arg2])]
     return expr(stack, xs[1:])
 
