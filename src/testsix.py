@@ -70,3 +70,15 @@ class TextSix(unittest.TestCase):
     def testPrefixVsPostfix(self):
         self.assertEqual(n('++ [prefix]', [n('++ [postfix]', ['x'])]),
                          p('++ x ++'))
+    
+    def testMultiplePrefix(self):
+        self.assertEqual(n('-- [prefix]', 
+                           [n('++ [prefix]', 
+                              [n('! [prefix]', ['x'])])]), 
+                         p('-- ++ ! x'))
+
+    def testMultiplePostfix(self):
+        self.assertEqual(n('++ [postfix]', 
+                           [n('-- [postfix]', 
+                              [n('? [postfix]', ['x'])])]), 
+                         p('x ? -- ++'))
