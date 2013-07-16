@@ -11,7 +11,8 @@ import json
 #    `a ^ b ^ c` => `(a ^ (b ^ c))`
 # 4. an operator may be both infix and prefix, or
 #    prefix and postfix, but not infix and postfix
-# 5. an operator may not also be an operand
+# 5. an operator may also be an operand -- i.e.
+#    `& & &` -- but not always ... not sure when
 # 6. if precedences are equal, associativities must
 #    also be equal
 #    cases: infix-infix, prefix-infix, infix-postfix
@@ -27,10 +28,12 @@ def node(op, args):
 
 prefix = {
     '++': 110, '--': 110, '-': 110, '+': 110, '!': 110, '~': 110,
+    '?': 50
 }
 
 postfix = {
-    '++': 120, '--': 120
+    '++': 120, '--': 120, 
+    '?': 50
 }
 
 infix = {
@@ -128,7 +131,7 @@ def expr(stack, xs):
             if postfix[post] > prec1:
                 break
             # disallow mixed associativity if same precedence
-            if postfix[post] == prec1 and op1 in rights: # postfix operators are always left-associative
+            if postfix[post] == prec1 and assoc1 == 'right': # postfix operators are always left-associative
                 raise ValueError('error -- equal precedence but different associativity')
             stack.pop() # uh-oh, value mutation!
             arg2 = node(op1, args1 + [arg2])
