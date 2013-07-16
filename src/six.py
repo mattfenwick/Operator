@@ -104,7 +104,7 @@ def parsePostfixes(stack, arg2, xs):
         xs = xs[1:]
     return stack, xs, arg2
 
-def expr(stack, xs):
+def expr(xs):
     """
     step 1: prefixes
     step 2: operand
@@ -113,23 +113,27 @@ def expr(stack, xs):
     step 5: pop stack (if necessary)
     step 6: push new stack frame
     """
-    stack, xs = parsePrefixes(stack, xs)
+    stack = []
+    while True:
+        stack, xs = parsePrefixes(stack, xs)
+        if len(xs) == 1: # len == 0 case handled by parsePrefixes
+            last = xs[0]
+            break
     
-    if len(xs) == 1: # len == 0 case handled by parsePrefixes
-        return done(stack, xs[0])
+        stack, xs, arg = parsePostfixes(stack, xs[0], xs[1:])
+        if len(xs) == 0:
+            last = arg
+            break
     
-    stack, xs, arg = parsePostfixes(stack, xs[0], xs[1:])
-    
-    if len(xs) == 0:
-        return done(stack, arg)
-    
-    op = xs[0]
-    assoc = 'right' if op in rights else 'left'
-    # step 5
-    stack, arg2 = unwind(stack, assoc, infix[op], arg)
-    # step 6
-    stack = stack + [(op, assoc, infix[op], [arg2])]
-    return expr(stack, xs[1:])
+        op = xs[0]
+        assoc = 'right' if op in rights else 'left'
+        # step 5
+        stack, arg2 = unwind(stack, assoc, infix[op], arg)
+        # step 6
+        stack = stack + [(op, assoc, infix[op], [arg2])]
+        xs = xs[1:]
+
+    return done(stack, last)
 
 
 def pp(node, indent):
@@ -147,7 +151,7 @@ def pp(node, indent):
 
 
 def parse(ys):
-    return expr([], ys.split())
+    return expr(ys.split())
 
 def run(ys):
     v = parse(ys)
