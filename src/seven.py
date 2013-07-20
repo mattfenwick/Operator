@@ -45,7 +45,9 @@ prefix = {
 }
 
 mixfix = {
-    '?':  (':', 0)
+    '?' : (':',    0),
+    'if': ('else', 0),
+    '::': ('??',   0)
 }
 
 infix = {
@@ -68,7 +70,7 @@ infix = {
 }
 
 rights = set(['=',  '+=',  '-=',  '*=', 'Z', 'X', # check pre/post-fix associativity problem reporting 
-              '/=', '%=',  '&=',  '^=',
+              '/=', '%=',  '&=',  '^=', '::', 
               '|=', '<<=', '>>=', '>>>='])
 
 
