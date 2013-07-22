@@ -5,7 +5,7 @@ n = seven.node
 def p(xs):
     return seven.parse(xs)[0]
 
-class TextSix(unittest.TestCase):
+class TextSeven(unittest.TestCase):
 
     def testLoneOperand(self):
         self.assertEqual('3', p('3'))
