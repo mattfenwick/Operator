@@ -1,11 +1,13 @@
 import unittest
-from . import seven
+from . import operator
 
-n = seven.node
+
+n = operator.node
 def p(xs):
-    return seven.parse(xs)[0]
+    return operator.parse(xs)[0]
 
-class TextSeven(unittest.TestCase):
+
+class TestOperator(unittest.TestCase):
 
     def testLoneOperand(self):
         self.assertEqual('3', p('3'))
