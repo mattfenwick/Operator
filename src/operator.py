@@ -122,6 +122,27 @@ def parsePostfixes(stack, arg2, xs):
         xs = xs[1:]
     return stack, xs, arg2
 
+def parseInfix(stack, arg, xs):
+    op = xs[0]
+    assoc = 'right' if op in rights else 'left'
+    stack, arg2 = unwind(stack, assoc, infix[op], arg)
+    stack = stack + [(op, assoc, infix[op], [arg2])]
+    xs = xs[1:]
+    return (stack, xs)
+
+def parseMixfix(stack, arg, xs):
+    op = xs[0]
+    xs = xs[1:]
+    (second, prec) = mixfix[op]
+    assoc = 'right' if op in rights else 'left'
+    stack, arg2 = unwind(stack, assoc, prec, arg)
+    (arg3, xs) = expr(xs)
+    if xs[0] != second:
+        raise ValueError('mixfix operator ' + op + ': expected "' + second + '"')
+    stack = stack + [(op + ',' + second + ' [mixfix]', assoc, prec, [arg2, arg3])]
+    xs = xs[1:]
+    return (stack, xs)
+
 def expr(xs):
     """
     step 1: prefixes
@@ -146,22 +167,9 @@ def expr(xs):
     
         op = xs[0]
         if op in infix:
-            assoc = 'right' if op in rights else 'left'
-            # step 5
-            stack, arg2 = unwind(stack, assoc, infix[op], arg)
-            # step 6
-            stack = stack + [(op, assoc, infix[op], [arg2])]
-            xs = xs[1:]
+            stack, xs = parseInfix(stack, arg, xs)
         elif op in mixfix:
-            xs = xs[1:]
-            (second, prec) = mixfix[op]
-            assoc = 'right' if op in rights else 'left'
-            stack, arg2 = unwind(stack, assoc, prec, arg)
-            (arg3, xs) = expr(xs)
-            if xs[0] != second:
-                raise ValueError('mixfix operator ' + op + ': expected "' + second + '"')
-            stack = stack + [(op + ',' + second + ' [mixfix]', assoc, prec, [arg2, arg3])]
-            xs = xs[1:]
+            stack, xs = parseMixfix(stack, arg, xs)
         else:
             last = arg
             break
