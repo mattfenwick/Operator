@@ -5,7 +5,7 @@ import json
 #    `! ! ! x` => `(! (! (! x)))`
 # 2. postfix operators always associate to the left
 #    `x ++ ++ ++` => `(((x ++) ++) ++)`
-# 3. each infix operator may either always associate
+# 3. each infix/mixfix operator may either always associate
 #    to the left, or always associate to the right
 #    `x + y + z` => `((x + y) + z)`
 #    `a ^ b ^ c` => `(a ^ (b ^ c))`
@@ -15,24 +15,8 @@ import json
 #    `& & &` -- but not always ... not sure when
 # 6. if precedences are equal, associativities must
 #    also be equal
-#    cases: infix-infix, prefix-infix, infix-postfix
      
-# stack
-# (operator name, associativity, precedence, list of args)
-
-# other operators:
-#   new, [], .
-
-# meanings of `(...)` in java expressions:
-#
-# - postfix:  method call
-#        abc(1,2,3)
-#
-# - prefix:  type cast 
-#        y + (int) x
-#
-# - ???:  grouping
-#        y + (x)
+# stack frame fields:  (operator name, associativity, precedence, list of args)
 
 postfix = {
     '++': 120, '--': 120,
@@ -45,33 +29,34 @@ prefix = {
 }
 
 mixfix = {
-    '?' : (':',    0),
-    'if': ('else', 0),
-    '::': ('??',   0)
+    '?' : (0,  'left' ,  ':'   ),
+    'if': (0,  'left' ,  'else'),
+    '::': (0,  'right',  '??'  )
 }
 
 infix = {
-    'Z': 120, 'Y': 120,
-    'X': 110, 'W': 110,
-    '*': 100, '/': 100, '%': 100,
-    '+': 90,  '-': 90,
-    '<<': 80, '>>': 80, '>>>': 80,
-    '<': 70,  '>': 70,  '<=': 70, '>=': 70, 'instanceof': 70,
-    '==': 60, '!=': 60,
-    '&': 50,
-    '^': 40,
-    '|': 30,
-    '&&': 20,
-    '||': 10,
-    # _?_:_
-    '=':  -10, '+=':  -10, '-=':  -10, '*=':   -10,
-    '/=': -10, '%=':  -10, '&=':  -10, '^=':   -10,
-    '|=': -10, '<<=': -10, '>>=': -10, '>>>=': -10
+    'Z'  : (120, 'right'),  'Y' : (120, 'left'),
+    'X'  : (110, 'right'),  'W' : (110, 'left'),
+    '*'  : (100, 'left' ),  '/' : (100, 'left'), 
+    '%'  : (100, 'left' ),
+    '+'  : (90,  'left' ),  '-' : (90,  'left'),
+    '<<' : (80,  'left' ),  '>>': (80,  'left'), 
+    '>>>': (80,  'left' ),
+    '<'  : (70,  'left' ),  '>' : (70,  'left'),  
+    '<=' : (70,  'left' ),  '>=': (70,  'left'),  'instanceof': (70, 'left'),
+    '==' : (60,  'left' ),  '!=': (60,  'left'),
+    '&'  : (50,  'left' ),
+    '^'  : (40,  'left' ),
+    '|'  : (30,  'left' ),
+    '&&' : (20,  'left' ),
+    '||' : (10,  'left' ),
+    '='  : (-10, 'right'),  '+='  : (-10, 'right'), 
+    '-=' : (-10, 'right'),  '*='  : (-10, 'right'),
+    '/=' : (-10, 'right'),  '%='  : (-10, 'right'), 
+    '&=' : (-10, 'right'),  '^='  : (-10, 'right'),
+    '|=' : (-10, 'right'),  '<<=' : (-10, 'right'), 
+    '>>=': (-10, 'right'),  '>>>=': (-10, 'right')
 }
-
-rights = set(['=',  '+=',  '-=',  '*=', 'Z', 'X', # check pre/post-fix associativity problem reporting 
-              '/=', '%=',  '&=',  '^=', '::', 
-              '|=', '<<=', '>>=', '>>>='])
 
 
 def node(op, args):
@@ -124,17 +109,16 @@ def parsePostfixes(stack, arg2, xs):
 
 def parseInfix(stack, arg, xs):
     op = xs[0]
-    assoc = 'right' if op in rights else 'left'
-    stack, arg2 = unwind(stack, assoc, infix[op], arg)
-    stack = stack + [(op, assoc, infix[op], [arg2])]
+    (prec, assoc) = infix[op]
+    stack, arg2 = unwind(stack, assoc, prec, arg)
+    stack = stack + [(op, assoc, prec, [arg2])]
     xs = xs[1:]
     return (stack, xs)
 
 def parseMixfix(stack, arg, xs):
     op = xs[0]
     xs = xs[1:]
-    (second, prec) = mixfix[op]
-    assoc = 'right' if op in rights else 'left'
+    (prec, assoc, second) = mixfix[op]
     stack, arg2 = unwind(stack, assoc, prec, arg)
     (arg3, xs) = expr(xs)
     if xs[0] != second:
