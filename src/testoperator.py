@@ -38,6 +38,20 @@ class TestOperator(unittest.TestCase):
     def testRightAssociativity(self):
         self.assertEqual(n('=', ['x', n('=', ['y', 'z'])]), p('x = y = z'))
     
+    def testLeftVsRightLeftWins(self):
+        """
+        Associativity doesn't matter if left-hand operator precedence is greater
+        """
+        self.assertEqual(n('=', ['x', n('||', ['y', 'z'])]), p('x = y || z'))
+        self.assertEqual(n('=', [n('||', ['x', 'y']), 'z']), p('x || y = z'))
+    
+    def testLeftVsRightRightWins(self):
+        """
+        Associativity doesn't matter if right-hand operator precedence is greater
+        """
+        self.assertEqual(n('^^', [n('=', ['x', 'y']), 'z']), p('x = y ^^ z'))
+        self.assertEqual(n('^^', ['x', n('=', ['y', 'z'])]), p('x ^^ y = z'))
+    
     def testMixfixAssociativity(self):
         self.assertEqual(n('?,: [mixfix]', [n('?,: [mixfix]', ['a', 'b', 'c']), 'd', 'e']),
                          p('a ? b : c ? d : e'))
