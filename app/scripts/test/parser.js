@@ -2,10 +2,6 @@ define(["app/parser", "app/languages", "app/stack"], function(Parser, langs, Sta
 
     module("parser");
     
-    // prefix, infix, mixfix, postfix
-    // precedence, associativity
-    // prefix vs postfix, prefix vs infix/mixfix
-    
     var p = new Parser(langs.test),
         e = function(xs) {return p.expr(xs);};
     
@@ -41,10 +37,15 @@ define(["app/parser", "app/languages", "app/stack"], function(Parser, langs, Sta
                                                         'args': ['a']}]}, ['q']]);
     });
     
-        
-/*    test("simple tokens -> simple parse nodes", function() {
-        propEqual(pp.parse([ti, tf, ts, tsy]), 
-            good([pi, pf, ps, psy], []));
-    });*/
+    // prefix, infix, mixfix, postfix
+    // precedence, associativity
+    // prefix vs postfix, prefix vs infix/mixfix
+    
+    test("precedence", function() {
+        propEqual(e(['x', '+', 'y', '*', 'z']),
+                  [{'op': '+', 'args': ['x', {'op': '*', 'args': ['y', 'z']}]}, []]);
+        propEqual(e(['m', '*', 'n', '+', 'o']),
+                  [{'op': '+', 'args': [{'op': '*', 'args': ['m', 'n']}, 'o']}, []]);
+    });
     
 });

@@ -56,7 +56,8 @@ define(["app/stack"], function(Stack) {
         while (!(stack.isEmpty())) {
             frame = stack.first();
             op1 = frame.op, assoc1 = frame.assoc;
-            prec1 = frame.prec, arg1 = frame.args;
+            prec1 = frame.prec, args1 = frame.args;
+            console.log(JSON.stringify([assoc1, prec1, frame, 'd', arguments]));
             if ( prec2 > prec1 ) {
                 break;
             }
@@ -117,8 +118,8 @@ define(["app/stack"], function(Stack) {
     
     Parser.prototype.parseInfix = function(stack, arg, xs) {
         var op = xs[0],
-            prec = this.infix[op].prec,
-            assoc = this.infix[op].assoc,
+            prec = this.infix[op][0],
+            assoc = this.infix[op][1],
             temp = unwind(stack, assoc, prec, arg),
             stack = temp[0],
             arg2 = temp[1];
