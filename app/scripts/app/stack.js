@@ -7,7 +7,7 @@ define([], function() {
     }
     
     Stack.prototype.push = function(value) {
-        return Stack(value, this);
+        return new Stack(value, this);
     };
     
     Stack.prototype.pop = function() {
@@ -28,7 +28,7 @@ define([], function() {
         return this._empty; // undefined is falsy
     };
     
-    Stack.empty = Stack(null, null);
+    Stack.empty = new Stack(null, null);
     Stack.empty._empty = true;
         
     return Stack;
