@@ -5,7 +5,7 @@ define(["app/stack"], function(Stack) {
         if ( args.length === undefined || typeof(args) === 'string' ) { // actually not sure about the precedence here ... haha
             throw new Error('oops, "node" expected array of args');
         }
-        return {'operator': op, 'arguments': args};
+        return {'op': op, 'args': args};
     }
     
     function frame(op, assoc, prec, args) {
@@ -28,18 +28,25 @@ define(["app/stack"], function(Stack) {
         return temp;
     }
     
-    function parsePrefixes(stack, xs) {
+    function Parser(operators) {
+        this.prefix = operators.prefix;
+        this.infix = operators.infix;
+        this.mixfix = operators.mixfix;
+        this.postfix = operators.postfix;
+    }
+    
+    Parser.prototype.parsePrefixes = function(stack, xs) {
         var fst;
         while ( true ) {
             fst = xs[0];
-            if (!(fst in prefix)) { // OOPS -- <-- where does `prefix` come from?
+            if (!(fst in this.prefix)) {
                 break;
             }
-            stack = stack.push(frame(fst + ' [prefix]', 'right', prefix[fst], [])); // OOPS again
+            stack = stack.push(frame(fst + ' [prefix]', 'right', this.prefix[fst], []));
             xs = xs.slice(1);
         }
         return [stack, xs];
-    }
+    };
 
     function unwind(stack, assoc2, prec2, arg2) {
         var op1 = null, assoc1 = null,
@@ -62,12 +69,12 @@ define(["app/stack"], function(Stack) {
                 }
             }
             stack = stack.pop();
-            arg2 = node(op1, args1.concat(arg2);
+            arg2 = node(op1, args1.concat(arg2));
         }
         return [stack, arg2];
     }
     
-    function parsePostfixes(stack, arg2, xs) {
+    Parser.prototype.parsePostfixes = function(stack, arg2, xs) {
         var post = null,
             unwound = null;
         while ( true ) {
@@ -75,29 +82,29 @@ define(["app/stack"], function(Stack) {
                 break;
             }
             post = xs[0];
-            if (!(post in postfix)) { // OOPS -- <-- where does `postfix` come from?
+            if (!(post in this.postfix)) {
                 break;
             }
-            unwound = unwind(stack, 'left', postfix[post], arg2); // OOPS again
+            unwound = unwind(stack, 'left', this.postfix[post], arg2);
             stack = unwound[0];
             arg2 = unwound[1];
             arg2 = node(post + ' [postfix]', [arg2]);
             xs = xs.slice(1);
         }
         return [stack, xs, arg2];
-    }
+    };
     
-    function parseMixfix(stack, arg, xs) {
+    Parser.prototype.parseMixfix = function(stack, arg, xs) {
         var op = xs[0],
             xs = xs.slice(1),
-            temp = mixfix[op], // OOPS -- `mixfix`
-            prec = temp.prec,
-            assoc = temp.assoc,
-            second = temp.second, 
+            temp = this.mixfix[op],
+            prec = temp[0],
+            assoc = temp[1],
+            second = temp[2], 
             temp2 = unwind(stack, assoc, prec, arg),
             stack = temp2[0],
             arg2 = temp2[1],
-            temp3 = expr(xs),
+            temp3 = this.expr(xs),
             arg3 = temp3[0], // hmm, seems like false advertising to call it arg3.  is that right ????
             xs = temp3[1];
         if ( xs[0] !== second ) {
@@ -108,10 +115,10 @@ define(["app/stack"], function(Stack) {
         return [stack, xs];
     }
     
-    function parseInfix(stack, arg, xs) {
+    Parser.prototype.parseInfix = function(stack, arg, xs) {
         var op = xs[0],
-            prec = infix[op].prec,   // OOPS -- <-- `infix`
-            assoc = infix[op].assoc, // OOPS again
+            prec = this.infix[op].prec,
+            assoc = this.infix[op].assoc,
             temp = unwind(stack, assoc, prec, arg),
             stack = temp[0],
             arg2 = temp[1];
@@ -120,11 +127,11 @@ define(["app/stack"], function(Stack) {
         return [stack, xs];
     }
     
-    function expr(xs) {
+    Parser.prototype.expr = function(xs) {
         var stack = Stack.empty, 
             arg, op, last, temp;
         while ( true ) {
-            temp = parsePrefixes(stack, xs);
+            temp = this.parsePrefixes(stack, xs);
             stack = temp[0];
             xs = temp[1];
             if ( xs.length === 1 ) { // length 0 case handled by parsePrefixes
@@ -133,7 +140,7 @@ define(["app/stack"], function(Stack) {
                 break;
             }
             
-            temp = parsePostfixes(stack, xs[0], xs.slice(1));
+            temp = this.parsePostfixes(stack, xs[0], xs.slice(1));
             stack = temp[0];
             xs = temp[1];
             arg = temp[2];
@@ -143,12 +150,12 @@ define(["app/stack"], function(Stack) {
             }
             
             op = xs[0];
-            if ( op in infix ) { // OOPS -- `infix`
-                temp = parseInfix(stack, arg, xs);
+            if ( op in this.infix ) {
+                temp = this.parseInfix(stack, arg, xs);
                 stack = temp[0];
                 xs = temp[1];
-            } else if ( op in mixfix ) { // OOPS -- `mixfix`
-                temp = parseMixfix(stack, arg, xs);
+            } else if ( op in this.mixfix ) {
+                temp = this.parseMixfix(stack, arg, xs);
                 stack = temp[0];
                 xs = temp[1];
             } else {
@@ -160,6 +167,6 @@ define(["app/stack"], function(Stack) {
         return [done(stack, last), xs];
     }
     
-    return expr;
+    return Parser;
 
 });

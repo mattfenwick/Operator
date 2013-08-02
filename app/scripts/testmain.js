@@ -3,7 +3,7 @@ var NEW_TESTS = [
     "test/stack",
 //    "test/languages",
 //    "test/tokenizer",
-//    "test/parser"
+    "test/parser"
 ];
 
 require(NEW_TESTS, function() {

@@ -18,7 +18,7 @@ define([], function () {
 			    'if': [0,  'left' ,  'else'],
 			    '::': [0,  'right',  '??'  ]
 			},
-			'infix' {
+			'infix': {
 			    'Z'  : [120, 'right'],  'Y' : [120, 'left'],
 			    'X'  : [110, 'right'],  'W' : [110, 'left'],
 			    '*'  : [100, 'left' ],  '/' : [100, 'left'], 
