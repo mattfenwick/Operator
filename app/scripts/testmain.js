@@ -1,8 +1,8 @@
 
 var NEW_TESTS = [
     "test/stack",
-//    "test/languages",
-//    "test/tokenizer",
+    "test/languages",
+    "test/tokenizer",
     "test/parser"
 ];
 
