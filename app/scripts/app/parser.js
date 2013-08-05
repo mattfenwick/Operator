@@ -38,6 +38,9 @@ define(["app/stack"], function(Stack) {
     Parser.prototype.parsePrefixes = function(stack, xs) {
         var fst;
         while ( true ) {
+            if ( xs.length === 0 ) {
+                throw new Error('while parsing prefixes, did not find operand');
+            }
             fst = xs[0];
             if (!(fst in this.prefix)) {
                 break;

@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+ <head>
+  <title>Operation, version 0.01</title>
+  <meta content="An interactive environment for parsing operator expressions" name="description" />
+  <meta content="operators, programming, parsing" name="keywords" />
+  <meta content="Matt Fenwick" name="author" />
+
+  <link href="css/parser.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="scripts/vendor/jquery.js"></script>
+  <script data-main="scripts/main" src="scripts/vendor/require.js"></script>
+ </head>
+
+ <body>
+
+  <div id="container">
+   
+   <div id="left">
+    <div>
+     <div>Enter an operator expression -- press enter to parse:</div>
+     <textarea id="input"></textarea>
+    </div>
+
+    <div id="status"></div>
+   </div>
+  
+   <div id="right">
+    <div id="envcontainer">
+     <div id="ast">Parsed output:</div>
+    </div>
+   </div>
+   
+  </div>
+
+ </body>
+</html>
