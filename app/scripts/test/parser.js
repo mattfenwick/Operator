@@ -24,7 +24,7 @@ define(["app/parser", "app/languages", "app/stack"], function(Parser, langs, Sta
         propEqual(e('a + b'), [{'op': '+', 'args': ['a', 'b']}, []]);
         propEqual(e('q * r y'), [{'op': '*', 'args': ['q', 'r']}, ['y']]);
         // missing right operand
-        propEqual(e('t +'), 'should be error');
+        throws(function() {e('t +');}, /did not find operand/, 'should be error');
     });
     
     test("mixfix", function() {

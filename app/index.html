@@ -8,6 +8,7 @@
 
   <link href="css/parser.css" rel="stylesheet" type="text/css" />
   <script type="text/javascript" src="scripts/vendor/jquery.js"></script>
+  <script type="text/javascript" src="scripts/vendor/jstree/jquery.jstree.js"></script>
   <script data-main="scripts/main" src="scripts/vendor/require.js"></script>
  </head>
 
@@ -16,18 +17,56 @@
   <div id="container">
    
    <div id="left">
+
     <div>
-     <div>Enter an operator expression -- press enter to parse:</div>
+     Step 1:  choose a language
+     <select id="language">
+      <option value="java">Java</option>
+      <option value="python">Python</option>
+      <option value="test">Test</option>
+      <option value="math">Math</option>
+      <option value="new">Create new</option>
+     </select>
+    </div>
+
+    <div>
+     Step 2: create/delete/modify operators, precedences, and associativities
+     <table id="operators">
+      <thead>
+       <tr><th>name</th><th>fixity</th><th>precedence</th><th>associativity</th></tr>
+       <tbody></tbody>
+      </thead>
+     </table>
+    </div>
+
+    <div>
+     <div>Step 3: enter an operator expression.
+       Tokens are separated by 1 or more whitespace characters.
+       Press enter to parse:</div>
      <textarea id="input"></textarea>
     </div>
 
     <div id="status"></div>
    </div>
   
+  
    <div id="right">
-    <div id="envcontainer">
-     <div id="ast">Parsed output:</div>
+
+    <div>
+      Fully parenthesized expression:
+     <div id="parenthesized"></div>
     </div>
+
+    <div>
+      Expression tree:
+      <ul id="ast"></ul>
+    </div>
+
+    <div>
+      Remaining tokens after parse:
+      <ul id="rest"></ul>
+    </div>
+
    </div>
    
   </div>
