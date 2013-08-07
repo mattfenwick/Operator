@@ -1,6 +1,10 @@
 define(["app/stack"], function(Stack) {
     "use strict";
     
+    function operator(name, fixity) {
+        return {'name': name, 'fixity': fixity};
+    }
+    
     function node(op, args) {
         if ( args.length === undefined || typeof(args) === 'string' ) { // actually not sure about the precedence here ... haha
             throw new Error('oops, "node" expected array of args');
@@ -45,7 +49,7 @@ define(["app/stack"], function(Stack) {
             if (!(fst in this.prefix)) {
                 break;
             }
-            stack = stack.push(frame(fst + ' [prefix]', 'right', this.prefix[fst], []));
+            stack = stack.push(frame(operator(fst, 'prefix'), 'right', this.prefix[fst], []));
             xs = xs.slice(1);
         }
         return [stack, xs];
@@ -92,7 +96,7 @@ define(["app/stack"], function(Stack) {
             unwound = unwind(stack, 'left', this.postfix[post], arg2);
             stack = unwound[0];
             arg2 = unwound[1];
-            arg2 = node(post + ' [postfix]', [arg2]);
+            arg2 = node(operator(post, 'postfix'), [arg2]);
             xs = xs.slice(1);
         }
         return [stack, xs, arg2];
@@ -114,7 +118,7 @@ define(["app/stack"], function(Stack) {
         if ( xs[0] !== second ) {
             throw new Error('mixfix operator ' + op + ': expected "' + second + '"');
         }
-        stack = stack.push(frame(op + ',' + second + ' [mixfix]', assoc, prec, [arg2, arg3])); 
+        stack = stack.push(frame(operator([op, second], 'mixfix'), assoc, prec, [arg2, arg3])); 
         xs = xs.slice(1);
         return [stack, xs];
     }
@@ -126,7 +130,7 @@ define(["app/stack"], function(Stack) {
             temp = unwind(stack, assoc, prec, arg),
             stack = temp[0],
             arg2 = temp[1];
-        stack = stack.push(frame(op, assoc, prec, [arg2]));
+        stack = stack.push(frame(operator(op, 'infix'), assoc, prec, [arg2]));
         xs = xs.slice(1);
         return [stack, xs];
     }
