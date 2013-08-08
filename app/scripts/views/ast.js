@@ -17,7 +17,8 @@ define(function() {
         if ( typeof node === 'string' ) {
             return '<li>' + node + '</li>';
         }
-        return '<li>' + node.op + '<ul>' + node.args.map(something).join('') + '</ul></li>';
+        var op = [node.op.name, node.op.fixity].join(' ');
+        return '<li>' + op + '<ul>' + node.args.map(something).join('') + '</ul></li>';
     }
     
     return AST;
