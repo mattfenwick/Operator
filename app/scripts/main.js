@@ -50,22 +50,22 @@ require(["views/ast", "views/rest", "views/status",
             }
         }
         
-	    $("#input").bind('keydown', function(e) {
-	        var code = (e.keyCode ? e.keyCode : e.which);
-	        if( code == 13 ) {                               // why isn't this `===`?
-	            action($("#input").val());
-	        }
-	        return true;                                     // forgot why it has to return true
-	    });
-	    
-	    $("#language").change(function() {
-	        var langname = $("#language").val(),
-	            lang = langs[langname];
-	        // does this code deal with exceptions correctly?
-	        //   i.e. will any exceptions screw up the state of the app?
-	        ops.display(lang);
-	        parser = new Parser(lang);
-	    }).change();
+        $("#input").bind('keydown', function(e) {
+            var code = (e.keyCode ? e.keyCode : e.which);
+            if( code === 13 ) {
+                action($("#input").val());
+            }
+            return true;                                     // forgot why it has to return true
+        });
+        
+        $("#language").change(function() {
+            var langname = $("#language").val(),
+                lang = langs[langname];
+            // does this code deal with exceptions correctly?
+            //   i.e. will any exceptions screw up the state of the app?
+            ops.display(lang);
+            parser = new Parser(lang);
+        }).change();
     
     });
     
