@@ -4,8 +4,14 @@ require(["views/ast", "views/rest", "views/status",
         function(AST, Rest, Status, Tk, Parser, L, Paren, Ops) {
     "use strict";
     
-    var lang = L.test,
-        parser = new Parser(lang);    // for now, we'll hard-code this.  change it up later
+    var langs = {
+            'python': L.python,
+            'java'  : L.java,
+            'test'  : L.test,
+            'math'  : L.math,
+            'new'   : new L.Language()
+        },
+        parser;
     
     // listeners needed:
     //   - language selection
@@ -23,8 +29,6 @@ require(["views/ast", "views/rest", "views/status",
             rest   = new Rest($("#rest")),
             paren  = new Paren($("#parenthesized")),
             ops    = new Ops($("#operators tbody"));
-        
-        ops.display(lang);
         
         function action(str) {
             var result, tree, remaining;
@@ -53,6 +57,15 @@ require(["views/ast", "views/rest", "views/status",
 	        }
 	        return true;                                     // forgot why it has to return true
 	    });
+	    
+	    $("#language").change(function() {
+	        var langname = $("#language").val(),
+	            lang = langs[langname];
+	        // does this code deal with exceptions correctly?
+	        //   i.e. will any exceptions screw up the state of the app?
+	        ops.display(lang);
+	        parser = new Parser(lang);
+	    }).change();
     
     });
     
