@@ -1,10 +1,11 @@
 require(["views/ast", "views/rest", "views/status",
          "app/tokenizer", "app/parser", "app/languages",
-         "views/parenthesized"], 
-        function(AST, Rest, Status, Tk, Parser, L, Paren) {
+         "views/parenthesized", "views/operators"], 
+        function(AST, Rest, Status, Tk, Parser, L, Paren, Ops) {
     "use strict";
     
-    var parser = new Parser(L.test);    // for now, we'll hard-code this.  change it up later
+    var lang = L.test,
+        parser = new Parser(lang);    // for now, we'll hard-code this.  change it up later
     
     // listeners needed:
     //   - language selection
@@ -20,7 +21,10 @@ require(["views/ast", "views/rest", "views/status",
         var status = new Status($("#status")),
             ast    = new AST($("#ast")),
             rest   = new Rest($("#rest")),
-            paren  = new Paren($("#parenthesized"));
+            paren  = new Paren($("#parenthesized")),
+            ops    = new Ops($("#operators tbody"));
+        
+        ops.display(lang);
         
         function action(str) {
             var result, tree, remaining;

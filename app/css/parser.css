@@ -19,7 +19,15 @@ div {
 }
 
 
-#env td, #env th {
+#divops td, #divops th {
   border: solid blue 1px;
   padding: 5px;
+}
+
+#divops {
+  height: 300px;
+}
+
+#divops input {
+  width: 80px;
 }

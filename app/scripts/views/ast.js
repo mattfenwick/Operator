@@ -19,7 +19,7 @@ define(function() {
         for(; i < arr.length; i++) {
             arr[i] = ' ';
         }
-        return arr.join(' ');
+        return arr.join('');
     }
     
     function node(val, indent) {
