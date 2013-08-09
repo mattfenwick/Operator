@@ -7,8 +7,6 @@ define(function() {
     
     AST.prototype.display = function(tree) {
         var str = node(tree, 0);
-        console.log('lookie: ' + str);
-        console.log('huh?  ' + this.elem + ' ' + JSON.stringify(this.elem));
         this.elem.text(str);
     };
     

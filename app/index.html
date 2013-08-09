@@ -8,7 +8,6 @@
 
   <link href="css/parser.css" rel="stylesheet" type="text/css" />
   <script type="text/javascript" src="scripts/vendor/jquery.js"></script>
-  <script type="text/javascript" src="scripts/vendor/jstree/jquery.jstree.js"></script>
   <script data-main="scripts/main" src="scripts/vendor/require.js"></script>
  </head>
 
@@ -25,44 +24,14 @@
       <option value="python">Python</option>
       <option value="test">Test</option>
       <option value="math">Math</option>
-      <option value="new">Create new</option>
      </select>
     </div>
 
     <div id="divops">
      Step 2: create/delete/modify operators, precedences, and associativities
-     
-     Prefix:
-     <table id="prefix">
-      <thead>
-       <tr><th>name</th><th>precedence</th></tr>
-       <tbody></tbody>
-      </thead>
-     </table>
-     
-     Infix:
-     <table id="infix">
-      <thead>
-       <tr><th>name</th><th>precedence</th><th>associativity</th></tr>
-       <tbody></tbody>
-      </thead>
-     </table>
-     
-     Mixfix:
-     <table id="mixfix">
-      <thead>
-       <tr><th>name (1)</th><th>name (2)</th><th>precedence</th><th>associativity</th></tr>
-       <tbody></tbody>
-      </thead>
-     </table>
-
-     Postfix:
-     <table id="postfix">
-      <thead>
-       <tr><th>name</th><th>precedence</th></tr>
-       <tbody></tbody>
-      </thead>
-     </table>
+     <textarea id="operators"></textarea>
+     <button id="saveops">Save operators</button>
+     <button id="resetops">Reset</button>
     </div>
 
     <div>

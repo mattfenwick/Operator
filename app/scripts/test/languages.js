@@ -1,8 +1,6 @@
-define(["app/languages"], function(L) {
+define(["app/languages"], function(languages) {
 
     module("languages");
-    
-    var languages = L();
     
     test("java", function() {    
         deepEqual(Object.keys(languages.java.prefix).length, 6);

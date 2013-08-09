@@ -31,3 +31,16 @@ div {
 #divops input {
   width: 80px;
 }
+
+.changed {
+  border: solid purple 2px;
+}
+
+.error {
+  border: solid red 2px;
+}
+
+#operators {
+  width: 85%;
+  height: 75%;
+}
