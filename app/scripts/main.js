@@ -74,20 +74,33 @@ require(["views/ast", "views/rest", "views/status",
         $("#language").change(function() {
             model.setLanguage($("#language").val());
         }).change();
-/*        
-        $("#operators .save").onclick(function() {
-            // what is `this` bound to -- ??
+
+        $(document).on('click', ".save", function() { // use `.on` so that future .save elements also have this listener
+            /*
             // how do I access the parent row, so that I can grab stuff from its $.data business?
+            var parent = $(this).parent(),  // what is `this` bound to -- ??
+                name = parent.data().name,
+                fixity = parent.data().fixity,
+                newname = $(".name", parent).val(),
+                newfixity = $(".fixity", parent).val(),
+                newprec = $(".prec", parent).val(),
+                newassoc = $(".assoc", parent).val();
+            model.changeOp(name, fixity, newname, newfixity, newprec, newassoc);
+            questions:
+             1. will this work for all operators, or just infix (i.e. do I have to do separate versions for each?)
+                can I create a generic, data-driven version based off of, I don't know, reading class names or
+                something from the child `td` elements of the parent row?
+            */
         });
         
-        $("#operators .reset").onclick(function() {
+        $(document).on('click', '.reset', function() {
             // call a model method ??
         });
         
-        $("#newop").onclick(function() {
+        $("#newop").click(function() {
             // save the operator in the model
         });
-*/        
+
     });
     
 });
