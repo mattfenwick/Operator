@@ -38,18 +38,16 @@ define(["app/tokenizer", "app/parser", "app/languages"], function(Tk, Parser, L)
     }
     
     Model.prototype.parse = function(str) {
-//        try {
+        try {
             console.log(JSON.stringify([this.parsers, Object.keys(this.parsers), typeof this.parsers.java]));
             var result = this.parsers[this.language].expr(Tk(str));
             console.log('parse result: ' + JSON.stringify(result));
             this.fire('parse-success', result[0], result[1]);
-//        } catch(e) {
-//            this.fire('parse-error', e);
-//        }
+        } catch(e) {
+            this.fire('parse-error', e);
+        }
     }
     
-    // so what are these doing ... modifying data of which there is 
-    //   only *1* copy ??? oops ... need to figure that one out again
     Model.prototype.removeOperator = function(name, fixity) {
         if ( name in LANGS ) {
             delete LANGS[this.language][fixity][name];
