@@ -33,6 +33,9 @@ define(["app/stack"], function(Stack) {
     }
     
     function Parser(operators) {
+        if (!operators) {
+            throw new Error('undefined operators in Parser');
+        }
         this.prefix = operators.prefix;
         this.infix = operators.infix;
         this.mixfix = operators.mixfix;
