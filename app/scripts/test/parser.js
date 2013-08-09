@@ -1,8 +1,9 @@
-define(["app/parser", "app/languages", "app/stack"], function(Parser, langs, Stack) {
+define(["app/parser", "app/languages", "app/stack"], function(Parser, L, Stack) {
 
     module("parser");
     
-    var p = new Parser(langs.test),
+    var langs = L(),
+        p = new Parser(langs.test),
         e = function(xs) {return p.expr(xs.split(' '));};
 
     function node(name, fixity, args) {

@@ -1,10 +1,8 @@
 define(["app/tokenizer", "app/parser", "app/languages"], function(Tk, Parser, L) {
     "use strict";
     
-    // maybe put the 'Language' class in here?
-    //   or maybe it's subsumed by the 'Model' class?
-    
-    var EVENTS = {
+    var LANGS = L(), 
+        EVENTS = {
         'set-language' : 1,
         'parse-success': 1,
         'parse-error'  : 1,
@@ -22,13 +20,13 @@ define(["app/tokenizer", "app/parser", "app/languages"], function(Tk, Parser, L)
         }
         this.language = null;
         this.parsers = {};
-        for ( var l in L ) {
-            this.parsers[l] = new Parser(L[l]);
+        for ( var l in LANGS ) {
+            this.parsers[l] = new Parser(LANGS[l]);
         }
     }
     
     Model.prototype.setLanguage = function(l) {
-        if (!(l in L)) {
+        if (!(l in LANGS)) {
             throw new Error('invalid language -- ' + l);
         }
         this.language = l;
@@ -36,7 +34,7 @@ define(["app/tokenizer", "app/parser", "app/languages"], function(Tk, Parser, L)
     }
     
     Model.prototype.getOperators = function() {
-        return L[this.language];
+        return LANGS[this.language];
     }
     
     Model.prototype.parse = function(str) {
@@ -53,8 +51,8 @@ define(["app/tokenizer", "app/parser", "app/languages"], function(Tk, Parser, L)
     // so what are these doing ... modifying data of which there is 
     //   only *1* copy ??? oops ... need to figure that one out again
     Model.prototype.removeOperator = function(name, fixity) {
-        if ( name in L ) {
-            delete L[this.language][fixity][name];
+        if ( name in LANGS ) {
+            delete LANGS[this.language][fixity][name];
             this.fire('remove-op', name, fixity);
         } else { // an exception b/c I *believe* this is impossible
             throw new Error('invalid operator/fixity -- ' + name + ', ' + fixity);
