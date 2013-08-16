@@ -32,6 +32,7 @@ define(modules, function(Tk, Parser, Ls, Language) {
         var jsobj, lang;
         try {
             jsobj = JSON.parse(opsString);
+            // oh no -- this won't tell me if there's duplicate keys
         } catch(e) {
             this.fire('op-error', 'invalid JSON string -- parse error');
             return;

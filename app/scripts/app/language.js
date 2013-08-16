@@ -8,17 +8,29 @@ define(function() {
         this.postfix = {};
         var name, temp;
         for ( name in operators.prefix ) {
+            if ( typeof operators.prefix[name] !== 'number' ) {
+                throw new Error('expected prefix operator name');
+            }
             this.addPrefix(name, operators.prefix[name]);
         }
         temp = operators.infix;
         for ( name in temp ) {
+            if ( temp[name].length !== 2 ) {
+                throw new Error('expected infix array of length 2');
+            }
             this.addInfix(name, temp[name][0], temp[name][1]);
         }
         temp = operators.mixfix;
         for ( name in temp ) {
+            if ( temp[name].length !== 3 ) {
+                throw new Error('expected mixfix array of length 3');
+            }
             this.addMixfix(name, temp[name][2], temp[name][0], temp[name][1]);
         }
         for ( name in operators.postfix ) {
+            if ( typeof operators.postfix[name] !== 'number' ) {
+                throw new Error('expected postfix operator name');
+            }
             this.addPostfix(name, operators.postfix[name]);
         }
     }

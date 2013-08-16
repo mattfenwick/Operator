@@ -2,8 +2,11 @@ html, body {
 
 }
 
+body {
+  background: #99ccff;
+}
 
-div {
+#left div, #right > div {
   border: solid black 1px;
   padding: 5px;
   overflow: auto;
@@ -11,7 +14,7 @@ div {
 
 #left, #right {
   width: 500px;
-  height: 680px;
+  height: 550px;
   float: left;
   padding: 5px;
   border: dotted gray 5px;
@@ -43,4 +46,15 @@ div {
 #operators {
   width: 85%;
   height: 75%;
+  background: #ffff99;
+}
+
+#input {
+  width: 85%;
+  height: 100px;
+  background: #ffcc99;
+}
+
+#right > div {
+  height: 125px;
 }
