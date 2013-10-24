@@ -9,7 +9,7 @@
   parsed as `1 + (2 * 3)` or `(1 + 2) * 3`?
   If precedences are different, associativity does not come into play.
  
- - prefix vs. infix -- assuming `=` is right-associative, and `!` is as well, since
+- prefix vs. infix -- assuming `=` is right-associative, and `!` is as well, since
    prefix operators seem to have to associate to the right, consider:
  
         ! x = 3
